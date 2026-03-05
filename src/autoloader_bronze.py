@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Dict
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, input_file_name, lit
+from pyspark.sql.functions import current_timestamp, input_file_name, lit, year, month, dayofmonth, to_date
 
 from config.env import (
     AZURE_CONTAINER_NAME,
@@ -60,12 +60,16 @@ def run_dataset_ingestion(spark: SparkSession, dataset_name: str) -> None:
     if AUTOLOADER_MAX_BYTES_PER_TRIGGER:
         reader = reader.option("maxBytesPerTrigger", AUTOLOADER_MAX_BYTES_PER_TRIGGER)
 
+    run_date = lit(datetime.utcnow().strftime("%Y-%m-%d"))
     source_df = (
         reader.load(paths["source_path"])
         .withColumn("_source_file", input_file_name())
         .withColumn("_ingest_timestamp", current_timestamp())
         .withColumn("_dataset", lit(dataset_name))
-        .withColumn("_ingest_run_date", lit(datetime.utcnow().strftime("%Y-%m-%d")))
+        .withColumn("_ingest_run_date", run_date)
+        .withColumn("_year", year(to_date(run_date)))
+        .withColumn("_month", month(to_date(run_date)))
+        .withColumn("_day", dayofmonth(to_date(run_date)))
     )
 
     query = (
@@ -73,6 +77,7 @@ def run_dataset_ingestion(spark: SparkSession, dataset_name: str) -> None:
         # Durable checkpoint for exactly-once progression into Bronze Delta.
         .option("checkpointLocation", paths["checkpoint_path"])
         .outputMode("append")
+        .partitionBy("_year", "_month", "_day")
         # Scheduled batch-style trigger: process available files then stop.
         .trigger(availableNow=True)
         .start(paths["bronze_path"])
