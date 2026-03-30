@@ -111,4 +111,12 @@ Used github copilot 'autopilot' for this front end build.
 Says ZeroTypeScript errors
 
 Front end is very bland, but available via local host. 
-Now working through trying to connect to the Azure SQL server via my local laptop. Had to download the ODBC driver and now need to add my IP to the server. 
+Now working through trying to connect to the Azure SQL server via my local laptop. Had to download the ODBC driver and now need to add my IP to the server.
+
+### First Draft — Web App Screenshots
+
+**Customers View**
+![Customers View](docs/screenshots/customers.png)
+
+**Orders View**
+![Orders View](docs/screenshots/orders.png) 
