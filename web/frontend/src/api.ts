@@ -17,23 +17,28 @@ async function apiPatch(path: string, body: Record<string, unknown>): Promise<vo
   if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`)
 }
 
+function buildQs(params?: Record<string, string | undefined>): string {
+  if (!params) return ''
+  const filtered = Object.fromEntries(
+    Object.entries(params).filter(([, v]) => v !== undefined && v !== '')
+  ) as Record<string, string>
+  const qs = new URLSearchParams(filtered).toString()
+  return qs ? '?' + qs : ''
+}
+
 export const api = {
-  getCustomers: (params?: { tier?: string; search?: string }) => {
-    const qs = new URLSearchParams(params as Record<string, string>).toString()
-    return apiFetch<Customer[]>(`/customers${qs ? '?' + qs : ''}`)
-  },
+  getCustomers: (params?: { tier?: string; search?: string }) =>
+    apiFetch<Customer[]>(`/customers${buildQs(params)}`),
+
   updateCustomer: (id: number, updates: Partial<Pick<Customer, 'customer_tier'>>) =>
     apiPatch(`/customers/${id}`, updates),
 
-  getProducts: (params?: { category?: string; search?: string }) => {
-    const qs = new URLSearchParams(params as Record<string, string>).toString()
-    return apiFetch<Product[]>(`/products${qs ? '?' + qs : ''}`)
-  },
+  getProducts: (params?: { category?: string; search?: string }) =>
+    apiFetch<Product[]>(`/products${buildQs(params)}`),
 
-  getOrders: (params?: { status?: string; customer_id?: string }) => {
-    const qs = new URLSearchParams(params as Record<string, string>).toString()
-    return apiFetch<Order[]>(`/orders${qs ? '?' + qs : ''}`)
-  },
+  getOrders: (params?: { status?: string; customer_id?: string }) =>
+    apiFetch<Order[]>(`/orders${buildQs(params)}`),
+
   updateOrder: (id: number, updates: Partial<Pick<Order, 'status'>>) =>
     apiPatch(`/orders/${id}`, updates),
 }

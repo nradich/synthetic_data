@@ -109,3 +109,6 @@ Going to go with Azure Functions and then a TypeScript front end, langugage of t
 
 Used github copilot 'autopilot' for this front end build. 
 Says ZeroTypeScript errors
+
+Front end is very bland, but available via local host. 
+Now working through trying to connect to the Azure SQL server via my local laptop. Had to download the ODBC driver and now need to add my IP to the server. 
