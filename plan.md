@@ -110,11 +110,22 @@ Designed realistic e-commerce schemas for 3 interconnected datasets:
 3. **Indexing Strategy**: Optimize for typical e-commerce queries
 4. **Data Relationships**: Proper foreign key constraints
 
-### Web Application (Phase 4)  
-1. **Azure Functions**: REST API endpoints for dataset access
-2. **Frontend Development**: React/Angular application for data visualization
-3. **Authentication**: Secure access to generated datasets
-4. **Digital Twin**: Advanced modeling based on synthetic data patterns
+### Web Application (Phase 4) ✅
+- Python Azure Functions API (GET/PATCH for customers, products, orders)
+- React TypeScript frontend with search, filter, inline edit, and styled tier/status badges
+- Running locally: `func start` + `npm run dev`
+
+### Azure Hosting (Phase 5)
+1. Create **Azure Static Web App** in existing resource group (`cloud_app`)
+2. Link to GitHub repo — SWA auto-generates a GitHub Actions CI/CD workflow
+3. Set app settings on SWA: `SQL_SERVER_HOST`, `SQL_SERVER_DATABASE`, `SQL_SERVER_USERNAME`, `SQL_SERVER_PASSWORD`
+4. Verify live URL: `https://<name>.azurestaticapps.net`
+
+### Frontend Restyle (Phase 6)
+1. Add a summary stats bar (total customers, orders, revenue)
+2. Cleaner table layout — tighter spacing, sticky header, row hover highlight
+3. Responsive layout for smaller screens
+4. Loading skeleton instead of plain "Loading..." text
 
 ## Technical Specifications
 

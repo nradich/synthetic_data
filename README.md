@@ -102,4 +102,21 @@ python src/sqlserver_publish.py
 - **Checkpoint utility** — added `library/clear_checkpoint.py`, a Databricks Python script that clears Auto Loader checkpoints for one or all datasets. Configures ADLS SAS auth before clearing so `dbutils.fs.rm` can reach the storage account.
 
 
-```
+## 3.30.2026
+Added merge into the SQL DB task within the Databricks job, and that operated well.
+Now working on the front end component.
+Going to go with Azure Functions and then a TypeScript front end, langugage of the agent. 
+
+Used github copilot 'autopilot' for this front end build. 
+Says ZeroTypeScript errors
+
+Front end is very bland, but available via local host. 
+Now working through trying to connect to the Azure SQL server via my local laptop. Had to download the ODBC driver and now need to add my IP to the server.
+
+### First Draft — Web App Screenshots
+
+**Customers View**
+![Customers View](docs/screenshots/customers.png)
+
+**Orders View**
+![Orders View](docs/screenshots/orders.png) 
