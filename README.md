@@ -120,3 +120,15 @@ Now working through trying to connect to the Azure SQL server via my local lapto
 
 **Orders View**
 ![Orders View](docs/screenshots/orders.png) 
+
+
+
+4.6.206
+Got the app deployed !
+Set up an Azure 'Static Webb App', it is pointed at my github repo for the various frontend and api configurations 
+There is a github action that runs everytime a PR into main happens to build the front end.
+
+
+App is deployed, adjusted DBX jobs to point at the Git repo instead of local workspace
+Next step is to download a skill for front end design and make the data more believeable...ie different delivery times, where the warehouse is, how we're shipping it etc 
+Play around with the data designer
