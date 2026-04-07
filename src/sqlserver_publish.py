@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Dict, List, Tuple
 
 import pyodbc
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
@@ -105,6 +106,12 @@ def _table_object_id_literal(table_name: str) -> str:
     return f"{schema_name}.{object_name}"
 
 
+@retry(
+    retry=retry_if_exception_type(pyodbc.OperationalError),
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=5, min=5, max=30),
+    reraise=True,
+)
 def _connection(sql_config: Dict[str, str]) -> pyodbc.Connection:
     connection_string = (
         "DRIVER={ODBC Driver 18 for SQL Server};"
@@ -114,7 +121,7 @@ def _connection(sql_config: Dict[str, str]) -> pyodbc.Connection:
         f"PWD={sql_config['password']};"
         "Encrypt=yes;"
         "TrustServerCertificate=no;"
-        "Connection Timeout=30;"
+        "Connection Timeout=60;"
     )
     return pyodbc.connect(connection_string)
 
