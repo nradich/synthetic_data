@@ -52,7 +52,7 @@ echo "✅ ODBC Driver 18 installed"
 
 # Install Python packages
 pip install --upgrade --quiet pip
-pip install --quiet --no-cache-dir pyodbc "nemo-microservices[data-designer]"
+pip install --quiet --no-cache-dir pyodbc tenacity "nemo-microservices[data-designer]"
 
 # Verify Python installation
 python - <<'EOF'
