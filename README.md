@@ -132,3 +132,8 @@ There is a github action that runs everytime a PR into main happens to build the
 App is deployed, adjusted DBX jobs to point at the Git repo instead of local workspace
 Next step is to download a skill for front end design and make the data more believeable...ie different delivery times, where the warehouse is, how we're shipping it etc 
 Play around with the data designer
+
+
+4.8
+Using the codebase in cursor now, trying to the composer 2 model.
+Going to download UI design skill and see how composer 2 does with implementing it.
