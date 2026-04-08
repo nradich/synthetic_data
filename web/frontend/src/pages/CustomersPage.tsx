@@ -22,7 +22,12 @@ export default function CustomersPage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [tier])
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      load()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [tier])
 
   const handleSearch = (e: React.FormEvent) => { e.preventDefault(); load() }
 
@@ -34,7 +39,6 @@ export default function CustomersPage() {
 
   return (
     <div className="page">
-      <h2>Customers</h2>
       <div className="toolbar">
         <form onSubmit={handleSearch}>
           <input
@@ -53,6 +57,7 @@ export default function CustomersPage() {
       {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
       {!loading && !error && (
+        <div className="table-wrap">
         <table>
           <thead>
             <tr>
@@ -82,11 +87,11 @@ export default function CustomersPage() {
                 <td>
                   {editingId === c.customer_id ? (
                     <>
-                      <button onClick={() => saveEdit(c.customer_id)}>Save</button>
-                      <button onClick={() => setEditingId(null)}>Cancel</button>
+                      <button type="button" onClick={() => saveEdit(c.customer_id)}>Save</button>
+                      <button type="button" onClick={() => setEditingId(null)}>Cancel</button>
                     </>
                   ) : (
-                    <button onClick={() => { setEditingId(c.customer_id); setEditTier(c.customer_tier) }}>
+                    <button type="button" onClick={() => { setEditingId(c.customer_id); setEditTier(c.customer_tier) }}>
                       Edit
                     </button>
                   )}
@@ -95,6 +100,7 @@ export default function CustomersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
       <p className="count">{customers.length} records</p>
     </div>

@@ -1,13 +1,153 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* Design tokens — light default (UI_Design.MD pattern) */
+:root {
+  color-scheme: light;
+
+  /* Primary (blue-forward) */
+  --color-primary-100: #dbeafe;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+
+  /* Neutrals */
+  --color-secondary-50: #f8fafc;
+  --color-secondary-100: #f1f5f9;
+  --color-secondary-200: #e2e8f0;
+  --color-secondary-300: #cbd5e1;
+  --color-secondary-400: #94a3b8;
+  --color-secondary-500: #64748b;
+  --color-secondary-600: #475569;
+  --color-secondary-700: #334155;
+  --color-secondary-800: #1e293b;
+  --color-secondary-900: #0f172a;
+
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --color-info: #3b82f6;
+
+  --surface-page: var(--color-secondary-100);
+  --surface-card: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sidebar: var(--color-secondary-900);
+  --surface-sidebar-border: rgba(255, 255, 255, 0.08);
+  --text-primary: var(--color-secondary-800);
+  --text-muted: var(--color-secondary-500);
+  --text-inverse: #f8fafc;
+  --border-default: var(--color-secondary-200);
+
+  --nav-item-color: var(--color-secondary-400);
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.06);
+  --nav-item-active-bg: rgba(59, 130, 246, 0.22);
+  --nav-item-active-color: #93c5fd;
+
+  --focus-ring: 0 0 0 3px rgb(59 130 246 / 0.35);
+
+  --font-family-primary: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+
+  --radius-input: 0.375rem;
+  --radius-card: 0.5rem;
+  --radius-nav: 8px;
+
+  --transition-fast: 150ms ease;
+  --transition-normal: 300ms ease;
+
+  /* Charts */
+  --chart-axis: #64748b;
+  --chart-grid: #e2e8f0;
+  --tooltip-bg: #ffffff;
+  --tooltip-border: #e2e8f0;
+  --tooltip-text: #334155;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-primary-100: #1e3a8a;
+  --color-primary-500: #60a5fa;
+  --color-primary-600: #3b82f6;
+  --color-primary-700: #2563eb;
+
+  --color-secondary-50: #0f172a;
+  --color-secondary-100: #1e293b;
+  --color-secondary-200: #334155;
+  --color-secondary-300: #475569;
+  --color-secondary-400: #64748b;
+  --color-secondary-500: #94a3b8;
+  --color-secondary-600: #cbd5e1;
+  --color-secondary-700: #e2e8f0;
+  --color-secondary-800: #f1f5f9;
+  --color-secondary-900: #f9fafb;
+
+  --surface-page: #0f172a;
+  --surface-card: #1e293b;
+  --surface-raised: #243144;
+  --surface-sidebar: #020617;
+  --surface-sidebar-border: rgba(255, 255, 255, 0.06);
+  --text-primary: var(--color-secondary-800);
+  --text-muted: var(--color-secondary-500);
+  --text-inverse: #f8fafc;
+  --border-default: var(--color-secondary-200);
+
+  --nav-item-color: var(--color-secondary-400);
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.06);
+  --nav-item-active-bg: rgba(96, 165, 250, 0.2);
+  --nav-item-active-color: #93c5fd;
+
+  --focus-ring: 0 0 0 3px rgb(96 165 250 / 0.35);
+
+  --chart-axis: #94a3b8;
+  --chart-grid: #334155;
+  --tooltip-bg: var(--surface-raised);
+  --tooltip-border: var(--border-default);
+  --tooltip-text: var(--text-primary);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
-  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
-  background: #f1f5f9;
-  color: #1e293b;
+  font-family: var(--font-family-primary);
+  background: var(--surface-page);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
 }
 
 #root {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
