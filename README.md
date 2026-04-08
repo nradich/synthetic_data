@@ -137,3 +137,4 @@ Play around with the data designer
 4.8
 Using the codebase in cursor now, trying to the composer 2 model.
 Going to download UI design skill and see how composer 2 does with implementing it.
+https://github.com/msitarzewski/agency-agents/blob/main/design/design-ui-designer.md
