@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { formatMoney } from '../money'
 import type { Product } from '../types'
 
 export default function ProductsPage() {
@@ -25,13 +26,17 @@ export default function ProductsPage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [category])
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      load()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [category])
 
   const handleSearch = (e: React.FormEvent) => { e.preventDefault(); load(category, search) }
 
   return (
     <div className="page">
-      <h2>Products</h2>
       <div className="toolbar">
         <form onSubmit={handleSearch}>
           <input
@@ -50,6 +55,7 @@ export default function ProductsPage() {
       {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
       {!loading && !error && (
+        <div className="table-wrap">
         <table>
           <thead>
             <tr>
@@ -64,13 +70,14 @@ export default function ProductsPage() {
                 <td>{p.product_name}</td>
                 <td>{p.brand}</td>
                 <td>{p.category}</td>
-                <td>${p.price}</td>
+                <td>{formatMoney(p.price)}</td>
                 <td>{p.stock_quantity}</td>
                 <td>{p.rating} ★</td>
               </tr>
             ))}
           </tbody>
         </table>
+        </div>
       )}
       <p className="count">{products.length} records</p>
     </div>

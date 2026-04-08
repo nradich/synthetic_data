@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { api } from '../api'
+import { formatMoney } from '../money'
 import type { Order } from '../types'
 
 const STATUSES = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
@@ -22,7 +23,12 @@ export default function OrdersPage() {
       .finally(() => setLoading(false))
   }
 
-  useEffect(() => { load() }, [status])
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      load()
+    })
+    return () => cancelAnimationFrame(id)
+  }, [status])
 
   const handleCustomerSearch = (e: React.FormEvent) => { e.preventDefault(); load() }
 
@@ -34,7 +40,6 @@ export default function OrdersPage() {
 
   return (
     <div className="page">
-      <h2>Orders</h2>
       <div className="toolbar">
         <form onSubmit={handleCustomerSearch}>
           <input
@@ -54,6 +59,7 @@ export default function OrdersPage() {
       {loading && <p>Loading...</p>}
       {error && <p className="error">{error}</p>}
       {!loading && !error && (
+        <div className="table-wrap">
         <table>
           <thead>
             <tr>
@@ -69,7 +75,7 @@ export default function OrdersPage() {
                 <td>{o.product_id}</td>
                 <td>{o.order_date?.slice(0, 10)}</td>
                 <td>{o.quantity}</td>
-                <td>${o.total_amount}</td>
+                <td>{formatMoney(o.total_amount)}</td>
                 <td>
                   {editingId === o.order_id ? (
                     <select value={editStatus} onChange={e => setEditStatus(e.target.value)}>
@@ -82,11 +88,11 @@ export default function OrdersPage() {
                 <td>
                   {editingId === o.order_id ? (
                     <>
-                      <button onClick={() => saveEdit(o.order_id)}>Save</button>
-                      <button onClick={() => setEditingId(null)}>Cancel</button>
+                      <button type="button" onClick={() => saveEdit(o.order_id)}>Save</button>
+                      <button type="button" onClick={() => setEditingId(null)}>Cancel</button>
                     </>
                   ) : (
-                    <button onClick={() => { setEditingId(o.order_id); setEditStatus(o.status) }}>
+                    <button type="button" onClick={() => { setEditingId(o.order_id); setEditStatus(o.status) }}>
                       Edit
                     </button>
                   )}
@@ -95,6 +101,7 @@ export default function OrdersPage() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
       <p className="count">{orders.length} records</p>
     </div>

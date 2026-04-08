@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -7,8 +7,11 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  CartesianGrid,
 } from 'recharts'
 import { api } from '../api'
+import { formatMoney, parseMoney } from '../money'
+import { useTheme } from '../ThemeContext'
 import type { Customer, Order, Product } from '../types'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -20,10 +23,31 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default function DashboardPage() {
+  const { theme } = useTheme()
   const [customers, setCustomers] = useState<Customer[]>([])
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
+
+  const chartUi = useMemo(
+    () =>
+      theme === 'dark'
+        ? {
+            axis: '#94a3b8',
+            grid: '#334155',
+            tooltipBg: '#243144',
+            tooltipBorder: '#475569',
+            tooltipColor: '#f1f5f9',
+          }
+        : {
+            axis: '#64748b',
+            grid: '#e2e8f0',
+            tooltipBg: '#ffffff',
+            tooltipBorder: '#e2e8f0',
+            tooltipColor: '#334155',
+          },
+    [theme],
+  )
 
   useEffect(() => {
     Promise.all([api.getCustomers(), api.getProducts(), api.getOrders()])
@@ -37,7 +61,6 @@ export default function DashboardPage() {
 
   if (loading) return <p className="loading">Loading dashboard...</p>
 
-  // Orders by status chart data
   const statusCounts = orders.reduce<Record<string, number>>((acc, o) => {
     acc[o.status] = (acc[o.status] ?? 0) + 1
     return acc
@@ -47,17 +70,13 @@ export default function DashboardPage() {
     count,
   }))
 
-  // Customer tier breakdown
   const tierCounts = customers.reduce<Record<string, number>>((acc, c) => {
     acc[c.customer_tier] = (acc[c.customer_tier] ?? 0) + 1
     return acc
   }, {})
 
-  // Total revenue
-  const totalRevenue = orders.reduce(
-    (sum, o) => sum + parseFloat(o.total_amount || '0'),
-    0,
-  )
+  const totalRevenue = orders.reduce((sum, o) => sum + parseMoney(o.total_amount), 0)
+  const tierDenom = Math.max(customers.length, 1)
 
   return (
     <div className="dashboard">
@@ -76,9 +95,7 @@ export default function DashboardPage() {
         </div>
         <div className="stat-card">
           <span className="stat-label">Total Revenue</span>
-          <span className="stat-value">
-            ${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
+          <span className="stat-value">{formatMoney(totalRevenue)}</span>
         </div>
       </div>
 
@@ -87,10 +104,17 @@ export default function DashboardPage() {
           <h3>Orders by Status</h3>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={chartData} margin={{ top: 4, right: 16, bottom: 4, left: 0 }}>
-              <XAxis dataKey="status" tick={{ fontSize: 12, fill: '#64748b' }} />
-              <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartUi.grid} vertical={false} />
+              <XAxis dataKey="status" tick={{ fontSize: 12, fill: chartUi.axis }} />
+              <YAxis tick={{ fontSize: 12, fill: chartUi.axis }} />
               <Tooltip
-                contentStyle={{ fontSize: 13, borderRadius: 8, border: '1px solid #e2e8f0' }}
+                contentStyle={{
+                  fontSize: 13,
+                  borderRadius: 8,
+                  border: `1px solid ${chartUi.tooltipBorder}`,
+                  background: chartUi.tooltipBg,
+                  color: chartUi.tooltipColor,
+                }}
               />
               <Bar dataKey="count" radius={[4, 4, 0, 0]}>
                 {chartData.map(entry => (
@@ -115,7 +139,7 @@ export default function DashboardPage() {
                   <div
                     className="tier-bar-fill"
                     style={{
-                      width: `${Math.round((count / customers.length) * 100)}%`,
+                      width: `${Math.round((count / tierDenom) * 100)}%`,
                     }}
                   />
                 </div>
