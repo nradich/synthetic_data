@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 from client import get_data_designer_client, NEMOTRON_30B_MODEL
-from schemas import DATASET_CONFIG
+from schemas import CUSTOMER_SCHEMA, DATASET_CONFIG
 from shipping_geo import METRO_LOCATIONS, WAREHOUSES, add_calendar_days, nearest_warehouse, transit_days_for
 
 def generate_realistic_dataset(client, dataset_name, config):
@@ -159,7 +159,8 @@ def create_enhanced_sample_data(schema, record_count, dataset_name):
         else:  # orders
             customer_id = 1001 + (i % 20)
             metro = METRO_LOCATIONS[(customer_id - 1001) % len(METRO_LOCATIONS)]
-            tier = schema["fields"]["customer_tier"]["options"][(customer_id - 1001) % 4]
+            _tier_options = CUSTOMER_SCHEMA["fields"]["customer_tier"]["options"]
+            tier = _tier_options[(customer_id - 1001) % len(_tier_options)]
             order_date = f"2024-{1 + (i % 12):02d}-{1 + (i % 28):02d}"
             wh_id, dist = nearest_warehouse(metro["latitude"], metro["longitude"])
             transit_days = transit_days_for(dist, tier)
