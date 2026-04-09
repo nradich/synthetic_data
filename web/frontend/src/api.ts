@@ -1,4 +1,4 @@
-import type { Customer, Order, Product } from './types'
+import type { Customer, Order, Product, Warehouse } from './types'
 
 const BASE = '/api'
 
@@ -35,6 +35,8 @@ export const api = {
 
   getProducts: (params?: { category?: string; search?: string }) =>
     apiFetch<Product[]>(`/products${buildQs(params)}`),
+
+  getWarehouses: () => apiFetch<Warehouse[]>('/warehouses'),
 
   getOrders: (params?: { status?: string; customer_id?: string }) =>
     apiFetch<Order[]>(`/orders${buildQs(params)}`),

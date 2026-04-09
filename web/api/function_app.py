@@ -111,26 +111,51 @@ def get_products(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(str(e), status_code=500)
 
 
+@app.route(route="warehouses", methods=["GET"])
+def get_warehouses(req: func.HttpRequest) -> func.HttpResponse:
+    query = """
+SELECT * FROM [syn_data].[warehouses]
+ORDER BY warehouse_id
+"""
+    try:
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(query)
+            rows = [row_to_dict(cursor, row) for row in cursor.fetchall()]
+        return func.HttpResponse(
+            json.dumps(rows, default=str),
+            mimetype="application/json",
+            status_code=200,
+        )
+    except Exception as e:
+        logging.exception("Error fetching warehouses")
+        return func.HttpResponse(str(e), status_code=500)
+
+
 @app.route(route="orders", methods=["GET"])
 def get_orders(req: func.HttpRequest) -> func.HttpResponse:
     status = req.params.get("status")
     customer_id = req.params.get("customer_id")
 
-    query = "SELECT * FROM [syn_data].[orders]"
+    query = """
+SELECT o.*, w.[name] AS warehouse_name, w.[city] AS warehouse_city
+FROM [syn_data].[orders] o
+LEFT JOIN [syn_data].[warehouses] w ON o.warehouse_id = w.warehouse_id
+"""
     conditions = []
     params = []
 
     if status:
-        conditions.append("[status] = ?")
+        conditions.append("o.[status] = ?")
         params.append(status)
     if customer_id:
-        conditions.append("customer_id = ?")
+        conditions.append("o.customer_id = ?")
         params.append(customer_id)
 
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
 
-    query += " ORDER BY order_id"
+    query += " ORDER BY o.order_id"
 
     try:
         with get_connection() as conn:

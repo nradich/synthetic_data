@@ -9,6 +9,8 @@ BEGIN
         [address] NVARCHAR(500) NULL,
         [registration_date] DATE NULL,
         [customer_tier] NVARCHAR(30) NULL,
+        [latitude] DECIMAL(9, 6) NULL,
+        [longitude] DECIMAL(9, 6) NULL,
         [_ingest_timestamp] DATETIME2 NULL
     );
 END

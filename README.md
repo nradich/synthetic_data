@@ -78,6 +78,15 @@ Optional env overrides:
 - `SQL_TABLE_CUSTOMERS` (default `syn_data.customers`)
 - `SQL_TABLE_PRODUCTS` (default `syn_data.products`)
 - `SQL_TABLE_ORDERS` (default `syn_data.orders`)
+- `SQL_TABLE_WAREHOUSES` (default `syn_data.warehouses`)
+
+### Shipping / warehouse schema (2026)
+
+Synthetic data now includes **warehouses**, **customer coordinates**, and **order shipping estimates** (nearest warehouse, transit days, estimated delivery date). Greenfield installs: run the numbered scripts under `sql/` including `005_create_warehouses.sql` and the updated `001` / `003` definitions.
+
+**Existing databases** created before these columns: run [`sql/008_alter_add_shipping.sql`](sql/008_alter_add_shipping.sql) once, then regenerate JSON and run Bronze + `sqlserver_publish` so new columns populate. The publisher only `CREATE TABLE`s when missing; it does not auto-`ALTER` legacy tables.
+
+Auto Loader datasets are now: `customers`, `products`, `warehouses`, `orders` (see `src/autoloader_bronze.py`).
 
 ### How to Run (Databricks)
 
@@ -138,3 +147,5 @@ Play around with the data designer
 Using the codebase in cursor now, trying to the composer 2 model.
 Going to download UI design skill and see how composer 2 does with implementing it.
 https://github.com/msitarzewski/agency-agents/blob/main/design/design-ui-designer.md
+
+4.9 Gave Cursor and VS code the same prompt to add warehouse info for our shipping and hopefully create a map in the front end. 

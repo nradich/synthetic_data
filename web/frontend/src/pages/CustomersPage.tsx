@@ -62,6 +62,7 @@ export default function CustomersPage() {
           <thead>
             <tr>
               <th>ID</th><th>Name</th><th>Email</th><th>Phone</th>
+              <th>Lat / Lon</th>
               <th>Registered</th><th>Tier</th><th>Edit</th>
             </tr>
           </thead>
@@ -72,6 +73,11 @@ export default function CustomersPage() {
                 <td>{c.first_name} {c.last_name}</td>
                 <td>{c.email}</td>
                 <td>{c.phone}</td>
+                <td>
+                  {c.latitude != null && c.longitude != null
+                    ? `${Number(c.latitude).toFixed(2)}, ${Number(c.longitude).toFixed(2)}`
+                    : '—'}
+                </td>
                 <td>{c.registration_date?.slice(0, 10)}</td>
                 <td>
                   {editingId === c.customer_id ? (

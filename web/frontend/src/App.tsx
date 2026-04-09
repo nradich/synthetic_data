@@ -3,10 +3,11 @@ import DashboardPage from './pages/DashboardPage'
 import CustomersPage from './pages/CustomersPage'
 import ProductsPage from './pages/ProductsPage'
 import OrdersPage from './pages/OrdersPage'
+import WarehousesPage from './pages/WarehousesPage'
 import { useTheme } from './ThemeContext'
 import './App.css'
 
-type Tab = 'dashboard' | 'customers' | 'products' | 'orders'
+type Tab = 'dashboard' | 'customers' | 'products' | 'warehouses' | 'orders'
 
 const NAV_ITEMS: { id: Tab; label: string; icon: ReactElement }[] = [
   {
@@ -40,6 +41,16 @@ const NAV_ITEMS: { id: Tab; label: string; icon: ReactElement }[] = [
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
         <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
         <line x1="12" y1="22.08" x2="12" y2="12" />
+      </svg>
+    ),
+  },
+  {
+    id: 'warehouses',
+    label: 'Warehouses',
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.75" viewBox="0 0 24 24">
+        <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4" />
+        <path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01" />
       </svg>
     ),
   },
@@ -122,6 +133,7 @@ export default function App() {
           {tab === 'dashboard' && <DashboardPage />}
           {tab === 'customers' && <CustomersPage />}
           {tab === 'products' && <ProductsPage />}
+          {tab === 'warehouses' && <WarehousesPage />}
           {tab === 'orders' && <OrdersPage />}
         </main>
       </div>

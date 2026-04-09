@@ -64,7 +64,8 @@ export default function OrdersPage() {
           <thead>
             <tr>
               <th>Order ID</th><th>Customer</th><th>Product</th><th>Date</th>
-              <th>Qty</th><th>Total</th><th>Status</th><th>Edit</th>
+              <th>Qty</th><th>Total</th><th>Warehouse</th><th>Transit (d)</th><th>Est. delivery</th>
+              <th>Status</th><th>Edit</th>
             </tr>
           </thead>
           <tbody>
@@ -76,6 +77,15 @@ export default function OrdersPage() {
                 <td>{o.order_date?.slice(0, 10)}</td>
                 <td>{o.quantity}</td>
                 <td>{formatMoney(o.total_amount)}</td>
+                <td title={o.warehouse_id != null ? `ID ${o.warehouse_id}` : undefined}>
+                  {o.warehouse_name
+                    ? `${o.warehouse_name}${o.warehouse_city ? ` (${o.warehouse_city})` : ''}`
+                    : o.warehouse_id != null
+                      ? `WH ${o.warehouse_id}`
+                      : '—'}
+                </td>
+                <td>{o.estimated_transit_days ?? '—'}</td>
+                <td>{o.estimated_delivery_date?.slice(0, 10) ?? '—'}</td>
                 <td>
                   {editingId === o.order_id ? (
                     <select value={editStatus} onChange={e => setEditStatus(e.target.value)}>

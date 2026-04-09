@@ -1,6 +1,6 @@
 """
 E-commerce Dataset Schemas for Synthetic Data Generation
-Defines structure for customers, products, and orders datasets
+Defines structure for customers, products, warehouses, and orders datasets
 """
 
 # Customer dataset schema
@@ -31,6 +31,14 @@ CUSTOMER_SCHEMA = {
         "address": {
             "type": "llm_generated",
             "description": "Full street address including city, state, ZIP"
+        },
+        "latitude": {
+            "type": "llm_generated",
+            "description": "Customer latitude (decimal degrees, continental US)"
+        },
+        "longitude": {
+            "type": "llm_generated",
+            "description": "Customer longitude (decimal degrees, continental US)"
         },
         "registration_date": {
             "type": "llm_generated",
@@ -122,11 +130,59 @@ ORDER_SCHEMA = {
         "shipping_address": {
             "type": "llm_generated",
             "description": "Shipping address - can match customer address or be different"
+        },
+        "warehouse_id": {
+            "type": "llm_generated",
+            "description": "Origin warehouse id (4001-4005) nearest to customer"
+        },
+        "estimated_transit_days": {
+            "type": "llm_generated",
+            "description": "Estimated calendar days in transit after tier adjustment"
+        },
+        "estimated_delivery_date": {
+            "type": "llm_generated",
+            "description": "order_date plus estimated_transit_days (YYYY-MM-DD)"
         }
     }
 }
 
-# Dataset generation configuration
+# Warehouse reference data (ids align with shipping_geo.WAREHOUSES)
+WAREHOUSE_SCHEMA = {
+    "name": "warehouses",
+    "description": "Distribution and fulfillment warehouse locations",
+    "fields": {
+        "warehouse_id": {
+            "type": "sequence",
+            "description": "Unique warehouse identifier starting from 4001"
+        },
+        "name": {
+            "type": "llm_generated",
+            "description": "Facility name"
+        },
+        "city": {
+            "type": "llm_generated",
+            "description": "City"
+        },
+        "state": {
+            "type": "llm_generated",
+            "description": "US state (2-letter)"
+        },
+        "postal_code": {
+            "type": "llm_generated",
+            "description": "ZIP code"
+        },
+        "latitude": {
+            "type": "llm_generated",
+            "description": "Latitude in decimal degrees"
+        },
+        "longitude": {
+            "type": "llm_generated",
+            "description": "Longitude in decimal degrees"
+        }
+    }
+}
+
+# Dataset generation configuration (order: customers, products, warehouses, then orders)
 DATASET_CONFIG = {
     "customers": {
         "schema": CUSTOMER_SCHEMA,
@@ -134,9 +190,14 @@ DATASET_CONFIG = {
         "filename": "customers.json"
     },
     "products": {
-        "schema": PRODUCT_SCHEMA, 
+        "schema": PRODUCT_SCHEMA,
         "record_count": 20,
         "filename": "products.json"
+    },
+    "warehouses": {
+        "schema": WAREHOUSE_SCHEMA,
+        "record_count": 5,
+        "filename": "warehouses.json"
     },
     "orders": {
         "schema": ORDER_SCHEMA,

@@ -13,7 +13,7 @@ from pyspark.sql import SparkSession
 
 from config.env import AZURE_CONTAINER_NAME, AZURE_STORAGE_ACCOUNT, AZURE_SAS_TOKEN
 
-DATASETS = ["customers", "products", "orders"]
+DATASETS = ["customers", "products", "warehouses", "orders"]
 
 
 def get_checkpoint_path(dataset_name: str) -> str:

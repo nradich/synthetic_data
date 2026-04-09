@@ -9,6 +9,9 @@ BEGIN
         [total_amount] NVARCHAR(32) NULL,
         [status] NVARCHAR(40) NULL,
         [shipping_address] NVARCHAR(500) NULL,
+        [warehouse_id] INT NULL,
+        [estimated_transit_days] INT NULL,
+        [estimated_delivery_date] DATE NULL,
         [_ingest_timestamp] DATETIME2 NULL
     );
 END

@@ -152,6 +152,7 @@ SQL_SERVER_PORT = _sql_server_config["port"]
 SQL_TABLE_CUSTOMERS = get_optional_env("SQL_TABLE_CUSTOMERS", "syn_data.customers")
 SQL_TABLE_PRODUCTS = get_optional_env("SQL_TABLE_PRODUCTS", "syn_data.products")
 SQL_TABLE_ORDERS = get_optional_env("SQL_TABLE_ORDERS", "syn_data.orders")
+SQL_TABLE_WAREHOUSES = get_optional_env("SQL_TABLE_WAREHOUSES", "syn_data.warehouses")
 SQL_WATERMARK_TABLE = get_optional_env("SQL_WATERMARK_TABLE", "syn_data.ingestion_watermark")
 
 # Legacy support - keeping original variable names available for backward compatibility
