@@ -76,6 +76,8 @@ def run_dataset_ingestion(spark: SparkSession, dataset_name: str) -> None:
         source_df.writeStream.format("delta")
         # Durable checkpoint for exactly-once progression into Bronze Delta.
         .option("checkpointLocation", paths["checkpoint_path"])
+        # Allow Bronze Delta table to absorb new columns from schema evolution.
+        .option("mergeSchema", "true")
         .outputMode("append")
         .partitionBy("year", "month", "day")
         # Scheduled batch-style trigger: process available files then stop.
