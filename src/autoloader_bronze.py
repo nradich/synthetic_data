@@ -21,7 +21,7 @@ from config.env import (
 from daily_synthetic_pipeline import configure_spark_adls_access
 
 
-DATASETS = ["customers", "products", "orders"]
+DATASETS = ["customers", "products", "warehouses", "orders"]
 
 
 def build_paths(dataset_name: str) -> Dict[str, str]:

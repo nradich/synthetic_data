@@ -5,6 +5,8 @@ export interface Customer {
   email: string
   phone: string
   address: string
+  latitude?: number
+  longitude?: number
   registration_date: string
   customer_tier: string
   _ingest_timestamp: string
@@ -31,5 +33,21 @@ export interface Order {
   total_amount: string
   status: string
   shipping_address: string
+  warehouse_id?: number | null
+  warehouse_name?: string | null
+  warehouse_city?: string | null
+  estimated_transit_days?: number | null
+  estimated_delivery_date?: string | null
+  _ingest_timestamp: string
+}
+
+export interface Warehouse {
+  warehouse_id: number
+  name: string
+  city: string
+  state: string
+  postal_code: string
+  latitude: number
+  longitude: number
   _ingest_timestamp: string
 }

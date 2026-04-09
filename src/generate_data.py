@@ -57,30 +57,10 @@ Make sure the data is realistic and consistent.
         return None
 
 def create_sample_data(schema, record_count):
-    """Create sample data structure (placeholder for actual API response)"""
-    
-    sample_data = []
-    
-    for i in range(record_count):
-        row = {}
-        for field_name, field_config in schema["fields"].items():
-            if field_config["type"] == "sequence":
-                if "customer" in schema["name"]:
-                    row[field_name] = 1001 + i
-                elif "product" in schema["name"]:
-                    row[field_name] = 2001 + i
-                else:  # orders
-                    row[field_name] = 3001 + i
-            elif field_config["type"] == "choice":
-                # For demo purposes, use first option
-                row[field_name] = field_config["options"][i % len(field_config["options"])]
-            else:
-                # Placeholder for LLM generated content
-                row[field_name] = f"Generated_{field_name}_{i+1}"
-        
-        sample_data.append(row)
-    
-    return sample_data
+    """Delegate to enhanced generator so CSV and JSON pipelines stay aligned."""
+    from generate_realistic_data import create_enhanced_sample_data
+
+    return create_enhanced_sample_data(schema, record_count, schema["name"])
 
 def save_to_csv(data, filename, output_dir):
     """Save generated data to CSV file"""

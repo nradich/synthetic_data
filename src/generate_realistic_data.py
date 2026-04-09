@@ -11,6 +11,7 @@ from pathlib import Path
 
 from client import get_data_designer_client, NEMOTRON_30B_MODEL
 from schemas import DATASET_CONFIG
+from shipping_geo import METRO_LOCATIONS, WAREHOUSES, add_calendar_days, nearest_warehouse, transit_days_for
 
 def generate_realistic_dataset(client, dataset_name, config):
     """Generate realistic dataset using NVIDIA Nemo Data Designer API"""
@@ -25,7 +26,7 @@ def generate_realistic_dataset(client, dataset_name, config):
         if dataset_name == "customers":
             prompt = f"""Generate {record_count} realistic customer records for an e-commerce store in CSV format.
 
-Include these exact columns: customer_id,first_name,last_name,email,phone,address,registration_date,customer_tier
+Include these exact columns: customer_id,first_name,last_name,email,phone,address,latitude,longitude,registration_date,customer_tier
 
 Requirements:
 - customer_id: sequential numbers starting from 1001
@@ -34,6 +35,7 @@ Requirements:
 - email: format firstname.lastname@domain.com (use gmail, yahoo, outlook)
 - phone: format (XXX) XXX-XXXX with valid US area codes
 - address: full street address with city, state, ZIP code
+- latitude, longitude: decimal degrees for the address metro area
 - registration_date: dates between 2023-01-01 and 2024-12-31
 - customer_tier: Bronze, Silver, Gold, or Platinum
 
@@ -56,10 +58,23 @@ Requirements:
 
 Return only CSV data with headers, no extra text."""
 
+        elif dataset_name == "warehouses":
+            prompt = f"""Generate {record_count} warehouse location records in CSV format.
+
+Include these exact columns: warehouse_id,name,city,state,postal_code,latitude,longitude
+
+Requirements:
+- warehouse_id: sequential starting from 4001
+- name: distribution center style name
+- city, state, postal_code: valid US locations
+- latitude, longitude: decimal degrees
+
+Return only CSV data with headers, no extra text."""
+
         else:  # orders
             prompt = f"""Generate {record_count} realistic order records for an e-commerce store in CSV format.
 
-Include these exact columns: order_id,customer_id,product_id,order_date,quantity,total_amount,status,shipping_address
+Include these exact columns: order_id,customer_id,product_id,order_date,quantity,total_amount,status,shipping_address,warehouse_id,estimated_transit_days,estimated_delivery_date
 
 Requirements:
 - order_id: sequential numbers starting from 3001
@@ -70,6 +85,9 @@ Requirements:
 - total_amount: between $5.99 and $2999.99 in format $XX.XX
 - status: Pending, Processing, Shipped, Delivered, or Cancelled
 - shipping_address: full street address with city, state, ZIP
+- warehouse_id: 4001-4005 matching nearest warehouse to customer
+- estimated_transit_days: integer calendar days (tier-adjusted)
+- estimated_delivery_date: order_date plus estimated_transit_days (YYYY-MM-DD)
 
 Return only CSV data with headers, no extra text."""
         
@@ -94,23 +112,37 @@ def create_enhanced_sample_data(schema, record_count, dataset_name):
     last_names = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", 
                   "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez"]
     domains = ["gmail.com", "yahoo.com", "outlook.com", "hotmail.com"]
-    cities = ["New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX", "Phoenix, AZ"]
-    
+    metro_labels = [m["label"] for m in METRO_LOCATIONS]
+
     for i in range(record_count):
         row = {}
-        
-        if dataset_name == "customers":
+
+        if dataset_name == "warehouses":
+            wh = WAREHOUSES[i] if i < len(WAREHOUSES) else WAREHOUSES[i % len(WAREHOUSES)]
+            row = {
+                "warehouse_id": wh["warehouse_id"],
+                "name": wh["name"],
+                "city": wh["city"],
+                "state": wh["state"],
+                "postal_code": wh["postal_code"],
+                "latitude": wh["latitude"],
+                "longitude": wh["longitude"],
+            }
+        elif dataset_name == "customers":
             fname = first_names[i % len(first_names)]
             lname = last_names[i % len(last_names)]
+            metro = METRO_LOCATIONS[i % len(METRO_LOCATIONS)]
             row = {
                 "customer_id": 1001 + i,
                 "first_name": fname,
                 "last_name": lname,
                 "email": f"{fname.lower()}.{lname.lower()}@{domains[i % len(domains)]}",
                 "phone": f"({555 + (i % 400):03d}) {100 + (i % 800):03d}-{1000 + (i % 9000):04d}",
-                "address": f"{100 + i} Main St, {cities[i % len(cities)]} {10001 + i}",
+                "address": f"{100 + i} Main St, {metro['label']} {10001 + i}",
+                "latitude": metro["latitude"],
+                "longitude": metro["longitude"],
                 "registration_date": f"2024-{1 + (i % 12):02d}-{1 + (i % 28):02d}",
-                "customer_tier": schema["fields"]["customer_tier"]["options"][i % 4]
+                "customer_tier": schema["fields"]["customer_tier"]["options"][i % 4],
             }
         elif dataset_name == "products":
             categories = schema["fields"]["category"]["options"]
@@ -122,20 +154,29 @@ def create_enhanced_sample_data(schema, record_count, dataset_name):
                 "description": f"High-quality product with advanced features and excellent performance",
                 "stock_quantity": 50 + (i * 10) % 450,
                 "brand": f"Brand{chr(65 + i % 26)}",
-                "rating": f"{3.0 + (i % 21) * 0.1:.1f}"
+                "rating": f"{3.0 + (i % 21) * 0.1:.1f}",
             }
         else:  # orders
+            customer_id = 1001 + (i % 20)
+            metro = METRO_LOCATIONS[(customer_id - 1001) % len(METRO_LOCATIONS)]
+            tier = schema["fields"]["customer_tier"]["options"][(customer_id - 1001) % 4]
+            order_date = f"2024-{1 + (i % 12):02d}-{1 + (i % 28):02d}"
+            wh_id, dist = nearest_warehouse(metro["latitude"], metro["longitude"])
+            transit_days = transit_days_for(dist, tier)
             row = {
                 "order_id": 3001 + i,
-                "customer_id": 1001 + (i % 20),
+                "customer_id": customer_id,
                 "product_id": 2001 + (i % 20),
-                "order_date": f"2024-{1 + (i % 12):02d}-{1 + (i % 28):02d}",
+                "order_date": order_date,
                 "quantity": 1 + (i % 5),
                 "total_amount": f"${25.99 + (i * 12.75):.2f}",
                 "status": schema["fields"]["status"]["options"][i % 5],
-                "shipping_address": f"{200 + i} Oak Ave, {cities[i % len(cities)]} {20001 + i}"
+                "shipping_address": f"{200 + i} Oak Ave, {metro_labels[(customer_id - 1001) % len(metro_labels)]} {20001 + i}",
+                "warehouse_id": wh_id,
+                "estimated_transit_days": transit_days,
+                "estimated_delivery_date": add_calendar_days(order_date, transit_days),
             }
-        
+
         sample_data.append(row)
     
     return sample_data
