@@ -1,151 +1,79 @@
-# sythentic_data
-Using Nvidia Nemo data designer to create a dataset, potentially web app and digital twin
+# Synthetic Web App
+
+This Web App is an end-to-end project for generating realistic logistics and commerce data, landing it in Azure storage, processing it in Databricks, publishing it to Azure SQL, and serving it through an Azure Functions API and TypeScript frontend.
+
+![Synthetic Web App Overview](docs/screenshots/title_visual.png)
+
+## Overview
+
+The project models a synthetic commerce system with customers, products, warehouses, and orders. The pipeline uses NVIDIA NeMo Data Designer to generate realistic records, Azure Data Lake Storage for landing data, Databricks Auto Loader for incremental ingestion, Azure SQL for serving, and a lightweight web application for exploration.
+
+At a glance, the platform covers:
+
+- Synthetic data generation guided by explicit schemas and shipping logic
+- Lake ingestion into Bronze Delta tables with Databricks Auto Loader
+- Incremental publish into Azure SQL using watermark-based processing
+- API access through Azure Functions
+- A React and TypeScript frontend for browsing operational data
+
+## Pipeline At A Glance
+
+1. Define the synthetic entities and generation rules in [src/schemas.py](src/schemas.py) and [src/shipping_geo.py](src/shipping_geo.py).
+2. Generate realistic datasets in [src/generate_realistic_data.py](src/generate_realistic_data.py).
+3. Write scheduled JSON outputs to Azure Data Lake Storage in [src/daily_synthetic_pipeline.py](src/daily_synthetic_pipeline.py).
+4. Ingest landed files into Bronze Delta tables with [src/autoloader_bronze.py](src/autoloader_bronze.py).
+5. Incrementally publish Bronze data into Azure SQL with [src/sqlserver_publish.py](src/sqlserver_publish.py).
+6. Orchestrate the downstream Databricks job with [src/autoloader_to_sql_pipeline.py](src/autoloader_to_sql_pipeline.py).
+7. Expose the data through the Azure Functions API in [web/api/function_app.py](web/api/function_app.py).
+8. Visualize and interact with the data in the frontend under [web/frontend](web/frontend).
+
+## Repository Layout
+
+- [src](src) contains the Python scripts that drive synthetic data generation, ADLS landing, Databricks ingestion, and SQL publishing.
+- [web](web) contains the application layer: the Azure Functions API and the TypeScript frontend.
+- [sql](sql) contains the database schema, table creation scripts, and schema evolution scripts for Azure SQL.
+- [config](config) contains environment and configuration helpers used across the Python pipeline.
+- [init-scripts](init-scripts) contains Databricks cluster setup scripts, including NeMo and ODBC installation.
+- [data](data) contains local sample CSVs that support development and testing flows.
+- [docs](docs) is the natural home for screenshots and additional documentation as the project evolves.
+
+## Source Workflow
+
+The [src](src) folder is the backbone of the platform. These are the main scripts in workflow order.
+
+1. [src/client.py](src/client.py) configures the NVIDIA NeMo client used during synthetic generation.
+2. [src/schemas.py](src/schemas.py) defines the core entities and fields that shape the generated datasets.
+3. [src/shipping_geo.py](src/shipping_geo.py) adds warehouse, geography, and shipping-estimate realism.
+4. [src/generate_realistic_data.py](src/generate_realistic_data.py) produces realistic records for the synthetic commerce domain.
+5. [src/daily_synthetic_pipeline.py](src/daily_synthetic_pipeline.py) writes generated outputs to Azure Data Lake Storage in a scheduled, partition-friendly format.
+6. [src/autoloader_bronze.py](src/autoloader_bronze.py) incrementally ingests landed JSON into Bronze Delta tables.
+7. [src/sqlserver_publish.py](src/sqlserver_publish.py) publishes Bronze data into Azure SQL using watermark-based processing.
+8. [src/autoloader_to_sql_pipeline.py](src/autoloader_to_sql_pipeline.py) runs the downstream ingestion and publish sequence together.
+
+Supporting scripts include [src/generate_data.py](src/generate_data.py) for earlier generation flows.
+
+## Application Layer
+
+- [web/api](web/api) contains the Azure Functions backend, including SQL connectivity in [web/api/shared/db.py](web/api/shared/db.py).
+- [web/frontend](web/frontend) contains the React and TypeScript user interface built with Vite.
+- [.github/workflows/azure-static-web-apps-gentle-plant-05f735b1e.yml](.github/workflows/azure-static-web-apps-gentle-plant-05f735b1e.yml) contains the deployment workflow for the web application.
 
 
-Gameplan:
-Use the nvidia data designer nemotron sdk to create a dataset, will start small
+## Database Layer
 
-https://build.nvidia.com/nemo/data-designer
+The [sql](sql) folder contains the scripts used to bootstrap and evolve the Azure SQL schema.
 
-read in karthpathy md for agentic development
-
-Next potentially load into a sql server and develop azure function to interact with a web app.
-
-February 4
-Spinning up Azure resource group
-Going to a databricks environment
-Going to setup ADLS so we can store the sythentic data we create
-Then have an autoloader pipeline take the json files, transform them and write as delta tables 
-
-Will then need to create an init script and odbc driver so we can insert into the database. 
-
-Pulled in repo to databricks. 
-Need to work through authentication of DBX to ADLS and can then write files there. 
-
-2.6.2026
-Trying to get DBX hooked up to ADLS for both read and write
-Can then have the synthentic data ingestion go to json, will need a secret in the key vault as well 
-
-Don't have unit catalog within the workspace, and tenant won't let me spin up a service principle.
-So doing the SAS token when I generate a token and store it in keyvault
-That worked, created SAS token in ADLS, and feed it to DBX secret scope
-
-Had the agent adjust to return json results
-Now need to add the key for nemotron and and the container to the config file 
-
-Tried to have it write to ADLS, couldn't get it working. Will need to use a different setup to test. 
-
-2.9
-Adjusted to use abfss filepath as opposed to blob
-Had to create the folder first within the ADLs, then it could write 
-Schedule in DBX with job cluster
-
-Tomorrow create autoloader pipeline to transform json to table. then load into SQL server via ODBC driver. 
-Then front end stuff..with azure functions 
-Will probably use line complete for the autoloader pipeline to keep agent request down for front end. 
-
-3.4
-Will not craft autoloader pipelin to write into the SQL server.
-Can then have a fast api. read the tables
-
-## Auto Loader to SQL Server Pipeline
-
-Implemented Databricks ingestion and publish scripts:
-
-- `src/autoloader_bronze.py`:
-	- Reads JSON files incrementally using Auto Loader (`cloudFiles`)
-	- Writes Bronze Delta with durable schema/checkpoint locations
-	- Uses `availableNow=True` for scheduled backfill-style execution
-- `src/sqlserver_publish.py`:
-	- Reads Bronze Delta incrementally using `_ingest_timestamp` watermark
-	- Upserts into SQL Server tables via ODBC (`pyodbc`, Driver 18)
-	- Stores watermark state in `dbo.ingestion_watermark`
-- `src/autoloader_to_sql_pipeline.py`:
-	- Orchestrates Bronze ingestion, then SQL publish
-
-### Required Secrets / Environment
-
-Databricks secret scope (`adls-scope`) keys:
-- `synthenticstorage`
-- `adls-sas-token`
-- `sql-server-host`
-- `sql-server-database`
-- `sql-server-username`
-- `sql-server-password`
-
-Optional env overrides:
-- `SQL_SERVER_PORT` (default `1433`)
-- `SQL_TABLE_CUSTOMERS` (default `syn_data.customers`)
-- `SQL_TABLE_PRODUCTS` (default `syn_data.products`)
-- `SQL_TABLE_ORDERS` (default `syn_data.orders`)
-- `SQL_TABLE_WAREHOUSES` (default `syn_data.warehouses`)
-
-### Shipping / warehouse schema (2026)
-
-Synthetic data now includes **warehouses**, **customer coordinates**, and **order shipping estimates** (nearest warehouse, transit days, estimated delivery date). Greenfield installs: run the numbered scripts under `sql/` including `005_create_warehouses.sql` and the updated `001` / `003` definitions.
-
-**Existing databases** created before these columns: run [`sql/008_alter_add_shipping.sql`](sql/008_alter_add_shipping.sql) once, then regenerate JSON and run Bronze + `sqlserver_publish` so new columns populate. The publisher only `CREATE TABLE`s when missing; it does not auto-`ALTER` legacy tables.
-
-Auto Loader datasets are now: `customers`, `products`, `warehouses`, `orders` (see `src/autoloader_bronze.py`).
-
-### How to Run (Databricks)
-
-1. Attach init script `init-scripts/install-nemo.sh` to the job cluster (this installs ODBC Driver 18 + Python deps).
-2. Install repo dependencies (`pip install -r requirements.txt`).
-3. Run end-to-end pipeline:
-
-```bash
-python src/autoloader_to_sql_pipeline.py
-```
-
-Or run in two phases:
-
-```bash
-python src/autoloader_bronze.py
-python src/sqlserver_publish.py
-```
-
-## 3.5.2026
-
-- **Bronze output partitioning** — `src/autoloader_bronze.py` now writes Delta partitioned by `_year/_month/_day`, aligning the Bronze layout with the source `YYYY/MM/DD` folder structure used by the synthetic data pipeline.
-- **Checkpoint utility** — added `library/clear_checkpoint.py`, a Databricks Python script that clears Auto Loader checkpoints for one or all datasets. Configures ADLS SAS auth before clearing so `dbutils.fs.rm` can reach the storage account.
+- [sql/000_create_schema_syn_data.sql](sql/000_create_schema_syn_data.sql) creates the schema.
+- [sql/001_create_customers.sql](sql/001_create_customers.sql), [sql/002_create_products.sql](sql/002_create_products.sql), [sql/003_create_orders.sql](sql/003_create_orders.sql), and [sql/005_create_warehouses.sql](sql/005_create_warehouses.sql) create the core tables.
+- [sql/004_create_ingestion_watermark.sql](sql/004_create_ingestion_watermark.sql) supports incremental publish tracking.
+- [sql/008_alter_add_shipping.sql](sql/008_alter_add_shipping.sql) extends older environments with shipping-related columns.
 
 
-## 3.30.2026
-Added merge into the SQL DB task within the Databricks job, and that operated well.
-Now working on the front end component.
-Going to go with Azure Functions and then a TypeScript front end, langugage of the agent. 
+## Next Steps
 
-Used github copilot 'autopilot' for this front end build. 
-Says ZeroTypeScript errors
-
-Front end is very bland, but available via local host. 
-Now working through trying to connect to the Azure SQL server via my local laptop. Had to download the ODBC driver and now need to add my IP to the server.
-
-### First Draft — Web App Screenshots
-
-**Customers View**
-![Customers View](docs/screenshots/customers.png)
-
-**Orders View**
-![Orders View](docs/screenshots/orders.png) 
+Read more about the web app here
 
 
 
-4.6.206
-Got the app deployed !
-Set up an Azure 'Static Webb App', it is pointed at my github repo for the various frontend and api configurations 
-There is a github action that runs everytime a PR into main happens to build the front end.
 
 
-App is deployed, adjusted DBX jobs to point at the Git repo instead of local workspace
-Next step is to download a skill for front end design and make the data more believeable...ie different delivery times, where the warehouse is, how we're shipping it etc 
-Play around with the data designer
-
-
-4.8
-Using the codebase in cursor now, trying to the composer 2 model.
-Going to download UI design skill and see how composer 2 does with implementing it.
-https://github.com/msitarzewski/agency-agents/blob/main/design/design-ui-designer.md
-
-4.9 Gave Cursor and VS code the same prompt to add warehouse info for our shipping and hopefully create a map in the front end. 
