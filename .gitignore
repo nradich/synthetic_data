@@ -52,3 +52,4 @@ Thumbs.db
 .env.local
 .env.production
 web/api/local.settings.json
+Blog.txt
