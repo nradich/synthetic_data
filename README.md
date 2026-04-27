@@ -18,6 +18,8 @@ At a glance, the platform covers:
 
 ## Pipeline At A Glance
 
+![Pipeline Overview](docs/screenshots/pipelines.png)
+
 1. Define the synthetic entities and generation rules in [src/schemas.py](src/schemas.py) and [src/shipping_geo.py](src/shipping_geo.py).
 2. Generate realistic datasets in [src/generate_realistic_data.py](src/generate_realistic_data.py).
 3. Write scheduled JSON outputs to Azure Data Lake Storage in [src/daily_synthetic_pipeline.py](src/daily_synthetic_pipeline.py).
@@ -26,6 +28,8 @@ At a glance, the platform covers:
 6. Orchestrate the downstream Databricks job with [src/autoloader_to_sql_pipeline.py](src/autoloader_to_sql_pipeline.py).
 7. Expose the data through the Azure Functions API in [web/api/function_app.py](web/api/function_app.py).
 8. Visualize and interact with the data in the frontend under [web/frontend](web/frontend).
+
+
 
 ## Repository Layout
 
@@ -59,6 +63,8 @@ Supporting scripts include [src/generate_data.py](src/generate_data.py) for earl
 - [.github/workflows/azure-static-web-apps-gentle-plant-05f735b1e.yml](.github/workflows/azure-static-web-apps-gentle-plant-05f735b1e.yml) contains the deployment workflow for the web application.
 
 
+![Pipeline Overview](docs/screenshots/frontend.png)
+
 ## Database Layer
 
 The [sql](sql) folder contains the scripts used to bootstrap and evolve the Azure SQL schema.
@@ -71,7 +77,7 @@ The [sql](sql) folder contains the scripts used to bootstrap and evolve the Azur
 
 ## Next Steps
 
-Read more about the web app here
+Read more about the [web app here](https://x.com/rads__22/status/2047809888311771605?s=46)
 
 
 
